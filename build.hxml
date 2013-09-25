@@ -1,2 +1,3 @@
--main As3ToHaxe
--neko As3ToHaxe.n
+-cp src
+-main AS3ToHaxe
+-neko bin/AS3ToHaxe.n

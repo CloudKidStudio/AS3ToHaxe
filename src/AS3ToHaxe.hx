@@ -32,12 +32,12 @@ import sys.FileSystem;
 import Sys;
 
 using StringTools;
-using As3ToHaxe;
+using AS3ToHaxe;
 
 /**
  * Simple Program which iterates -from folder, finds .mtt templates and compiles them to the -to folder
  */
-class As3ToHaxe
+class AS3ToHaxe
 {
 	public static var keys = ["-from", "-to", "-remove"];
 	
@@ -55,7 +55,7 @@ class As3ToHaxe
 	
 	static function main() 
 	{
-		new As3ToHaxe();
+		new AS3ToHaxe();
 	}
 	
 	public function new()
