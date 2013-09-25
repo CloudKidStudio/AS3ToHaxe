@@ -27,7 +27,7 @@ function set x(value:Number):Number {
 } 
 ```
 Should be replaced to this:
-```haxe
+```
 public var x(getX, setY):Float
 function getX ():Float
 {
@@ -47,7 +47,7 @@ AS3:
 sprite as Sprite
 ```  
 Should be replaced to this:
-```haxe
+```
 cast(sprite, Sprite)
 ```
 Where sprite is instance, Sprite is a class.
@@ -61,7 +61,7 @@ for each(var i:Item in items)
 }
 ```	
 Should be ported to:
-```haxe
+```
 for (i in items)
 {
 }
@@ -76,7 +76,7 @@ for (var i:int=0; i<10; ++i)
 }
 ```  
 Should be ported to:
-```haxe
+```
 for (i in 0...10)
 {
 }
@@ -89,7 +89,7 @@ AS3 "is" like
 (1 is Int)
 ``` 
 Should be changed to 
-```haxe
+```
 Std.is(1, Int)
 ```
 
@@ -106,7 +106,7 @@ AS3:
 var a:int = getTimer();
 ``` 
 Should be changed to:
-```haxe
+```
 var a:int = flash.utils.getTimer();
 ```
 
@@ -117,7 +117,7 @@ Replace Vector with Array
 Vector.<Sprite>
 ```   
 To
-```haxe
+```
 Array<Sprite>
 ```
 
@@ -127,7 +127,7 @@ AS3 code like this:
 var a:Vector.<MyClass> = new <MyClass> [new MyClass()];
 ```	
 To
-```haxe
+```
 var a:Array<MyClass> = new Array<MyClass>();
 a.push(new MyClass());
 ```
@@ -138,13 +138,13 @@ function test (...params):void {
 }
 ```
 Change to:
-```haxe
+```
 function test (params:Array<Dynamic>) {
 }
 ```   
  
 ###10.Final vars should be replaced with this tag 
-```haxe
+```
 @:final
 ```  
    
@@ -155,7 +155,7 @@ AS3:
 [Event(name="test",type="Foo")]
 ```
 To:
-```haxe
+```
 @:meta(Event(name="test",type="Foo"))
 ```
 And should be checked other things and changed like in this article.
