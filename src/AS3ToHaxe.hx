@@ -133,7 +133,16 @@ class AS3ToHaxe
 
 		// constructor
 		s = regReplace(s, "function " + className, "function new");
-			
+		
+		// Casts
+		s = regReplace(s, "([^a-zA-Z0-9_.]+)Number\\(([^\\)]+)\\)", "$1Std.parseFloat($2)");
+		s = regReplace(s, "([^a-zA-Z0-9_.]+)int\\((\\-?[0-9]*\\.[0-9]*+)\\)", "$1Std.int($2)");
+		s = regReplace(s, "([^a-zA-Z0-9_.]+)int\\(([^\\)]+)\\)", "$1Std.parseInt($2)");
+		s = regReplace(s, "([^a-zA-Z0-9_.]+)String\\(([^\\)]+)\\)", "$1Std.string($2)");
+		s = regReplace(s, "([^a-zA-Z0-9_.]+)([A-Z][a-zA-Z0-9_]*)\\(([^\\)]+)\\)", "$1cast($3, $2)");
+		s = regReplace(s, "([^a-zA-Z0-9_.]+)([a-zA-Z_][a-zA-Z0-9_]*) +as +([A-Z][a-zA-Z0-9_]*)", "$1cast($2, $3)");
+		s = regReplace(s, "([^a-zA-Z0-9_.]+)([a-zA-Z_][a-zA-Z0-9_]*)([ ]+)is([ ]+)([a-zA-Z_][a-zA-Z0-9_]*)", "$1Std.is($2,$5)");
+		
 		// simple typing
 		s = regReplace(s, ":([ ]*)void", ":$1Void");
 		s = regReplace(s, ":([ ]*)Boolean", ":$1Bool");

@@ -21,44 +21,6 @@ ant
 Todo
 ----
 
-###cast
-
-AS3:
-```as3
-sprite as Sprite
-```  
-Should be replaced to this:
-```
-cast(sprite, Sprite)
-```
-Where sprite is instance, Sprite is a class.
-
-###for
-
-AS3 Loops like this:
-```as3
-for (var i:int=0; i<10; ++i)
-{
-}
-```  
-Should be ported to:
-```
-for (i in 0...10)
-{
-}
-```
-
-###is
-
-AS3 "is" like 
-```as3
-(1 is Int)
-``` 
-Should be changed to 
-```
-Std.is(1, Int)
-```
-
 ###Haxe doesn't support lower case imports like this:
 ```as3
 import flash.utils.getQualifiedClassName;
