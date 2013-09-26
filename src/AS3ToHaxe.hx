@@ -114,7 +114,7 @@ class AS3ToHaxe
 		// spacse to tabs
 		s = quickRegR(s, "    ", "\t");
 		// undent
-		s = quickRegR(s, "\t\t", "\t");
+		s = quickRegR(s, "^\t", "");
 		
 		// some quick setup, finding what we''ve got
 		var className = quickRegM(s, "public class([ ]*)([A-Z][a-zA-Z0-9_]*)", 2)[1];
@@ -307,7 +307,7 @@ class AS3ToHaxe
 	private function buildNameSpaces()
 	{
 		// build friend namespaces!
-		trace(nameSpaces);
+		//trace(nameSpaces);
 	}
 	
 	public static function quickRegR(str:String, reg:String, rep:String, ?regOpt:String = "g"):String

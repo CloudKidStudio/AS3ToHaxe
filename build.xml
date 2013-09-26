@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<project name="AS3ToHaxe" default="build" basedir="./">
+	<property file="${user.home}\ant\my.build.properties"/>
+	<property file="${os.name}.build.properties"/>
+	<property file="build.properties"/>
+	
+	<macrodef name="test">
+		<attribute name="id" />
+		<sequential>
+			<fail unless="id" message="id needs to be specified in the build properties as the name of the project" />
+			<fail unless="build.dir" message="build.dir needs to be specified in the build properties output binary folder" />
+			<fail unless="runtime" message="runtime needs to be specified in the build properties as neko" />
+			<exec executable="${runtime}" failonerror="true">
+				<arg line="${build.dir}/${id}.n" />
+				<arg line="-from ${tests.dir}/@{id}" />
+				<arg line="-to ${tests.dir}/@{id}" />
+			</exec>
+		</sequential>
+	</macrodef>
+	
+	<target name="build">
+		<fail unless="compiler" message="compiler needs to be specified in the build properties as the haxe compiler" />
+		<fail unless="source.dir" message="source.dir needs to be specified in the build properties as the path of the source" />
+		<fail unless="id" message="id needs to be specified in the build properties as the name of the project" />
+		<fail unless="build.dir" message="build.dir needs to be specified in the build properties output binary folder" />
+		<fail unless="runtime" message="runtime needs to be specified in the build properties as neko" />
+		<exec executable="${compiler}" failonerror="true">
+			<arg line="-cp ${source.dir}" />
+			<arg line="-main ${id}" />
+			<arg line="-${runtime} ${build.dir}/${id}.n" />
+		</exec>
+	</target>
+	
+	<target name="buildTests">
+		<test id="Basic" />
+	</target>
+</project>

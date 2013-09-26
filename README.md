@@ -5,14 +5,19 @@ Simple utility to convert AS3 source code into Haxe.
 
 Using
 ------
+
 ```bash
 neko AS3ToHaxe.n -from pathToSource -to targetDirectory [-remove true]
 ```
-Building
---------
+
+Rebuilding AS3ToHaxe
+--------------------
+
 ```bash
-haxe build.hxml
+cd AS3ToHaxe
+ant
 ```
+
 Todo
 ----
 ###1.Getters/Setters
