@@ -86,7 +86,7 @@ class AS3ToHaxe
 				switch(ext)
 				{
 					case "as": 
-						doConversion(item);
+						convert(item);
 				}
 			}
 			
@@ -95,7 +95,7 @@ class AS3ToHaxe
 		}
 	}
 	
-	private function doConversion(file:String):Void
+	private function convert(file:String):Void
 	{		
 		var fromFile = file;
 		var toFile = to + "/" + file.substr(from.length + 1, file.lastIndexOf(".") - (from.length)) + "hx";
@@ -112,59 +112,59 @@ class AS3ToHaxe
 		var s = sys.io.File.getContent(fromFile);
 		
 		// spacse to tabs
-		s = quickRegR(s, "    ", "\t");
+		s = regReplace(s, "    ", "\t");
 		// undent
-		s = quickRegR(s, "^\t", "");
+		s = regReplace(s, "^\t", "");
 		
 		// some quick setup, finding what we''ve got
-		var className = quickRegM(s, "public class([ ]*)([A-Z][a-zA-Z0-9_]*)", 2)[1];
-		var hasVectors = (quickRegM(s, "Vector([ ]*)\\.([ ]*)<([ ]*)([^>]*)([ ]*)>").length != 0);
+		var className = regMatch(s, "public class([ ]*)([A-Z][a-zA-Z0-9_]*)", 2)[1];
+		var hasVectors = (regMatch(s, "Vector([ ]*)\\.([ ]*)<([ ]*)([^>]*)([ ]*)>").length != 0);
 
 		// package
-		s = quickRegR(s, "package ([a-zA-Z\\.0-9-_]*)([ \n\r]*){", "package $1;\n", "gs");
+		s = regReplace(s, "package ([a-zA-Z\\.0-9-_]*)([ \n\r]*){", "package $1;\n", "gs");
 		// remove last 
-		s = quickRegR(s, "\\}([\n\r\t ]*)\\}([\n\r\t ]*)$", "}", "gs");
+		s = regReplace(s, "\\}([\n\r\t ]*)\\}([\n\r\t ]*)$", "}", "gs");
 
 		// extra indentation
-		s = quickRegR(s, "\n\t", "\n");
+		s = regReplace(s, "\n\t", "\n");
 		
 		// class
-		s = quickRegR(s, "public class", "class");
+		s = regReplace(s, "public class", "class");
 
 		// constructor
-		s = quickRegR(s, "function " + className, "function new");
+		s = regReplace(s, "function " + className, "function new");
 			
 		// simple typing
-		s = quickRegR(s, ":([ ]*)void", ":$1Void");
-		s = quickRegR(s, ":([ ]*)Boolean", ":$1Bool");
-		s = quickRegR(s, ":([ ]*)int", ":$1Int");
-		s = quickRegR(s, ":([ ]*)uint", ":$1UInt");
-		s = quickRegR(s, ":([ ]*)Number", ":$1Float");
-		s = quickRegR(s, ":([ ]*)\\*", ":$1Dynamic");
+		s = regReplace(s, ":([ ]*)void", ":$1Void");
+		s = regReplace(s, ":([ ]*)Boolean", ":$1Bool");
+		s = regReplace(s, ":([ ]*)int", ":$1Int");
+		s = regReplace(s, ":([ ]*)uint", ":$1UInt");
+		s = regReplace(s, ":([ ]*)Number", ":$1Float");
+		s = regReplace(s, ":([ ]*)\\*", ":$1Dynamic");
 		
-		s = quickRegR(s, "<Number>", "<Float>");
-		s = quickRegR(s, "<int>", "<Int>");
-		s = quickRegR(s, "<uint>", "<UInt>");
-		s = quickRegR(s, "<Boolean>", "<Bool>");
+		s = regReplace(s, "<Number>", "<Float>");
+		s = regReplace(s, "<int>", "<Int>");
+		s = regReplace(s, "<uint>", "<UInt>");
+		s = regReplace(s, "<Boolean>", "<Bool>");
 		
 		// vector
 		// definition
-		s = quickRegR(s, "Vector([ ]*)\\.([ ]*)<([ ]*)([^>]*)([ ]*)>", "Vector<$3$4$5>");
+		s = regReplace(s, "Vector([ ]*)\\.([ ]*)<([ ]*)([^>]*)([ ]*)>", "Vector<$3$4$5>");
 		// new (including removing stupid spaces)
-		s = quickRegR(s, "new Vector([ ]*)([ ]*)<([ ]*)([^>]*)([ ]*)>([ ]*)\\(([ ]*)\\)([ ]*)", "new Vector()");
+		s = regReplace(s, "new Vector([ ]*)([ ]*)<([ ]*)([^>]*)([ ]*)>([ ]*)\\(([ ]*)\\)([ ]*)", "new Vector()");
 		// and import if we have to
 		if (hasVectors) {
-			s = quickRegR(s, "class([ ]*)(" + className + ")", "import flash.Vector;\n\nclass$1$2");
+			s = regReplace(s, "class([ ]*)(" + className + ")", "import flash.Vector;\n\nclass$1$2");
 		}
 		
 		// array
-		s = quickRegR(s, " Array([ ]*);", " Array<Dynamic>;");
+		s = regReplace(s, " Array([ ]*);", " Array<Dynamic>;");
 		
 		// remap protected -> private & internal -> private
-		s = quickRegR(s, "protected var", "private var");
-		s = quickRegR(s, "internal var", "private var");
-		s = quickRegR(s, "protected function", "private function");
-		s = quickRegR(s, "internal function", "private function");
+		s = regReplace(s, "protected var", "private var");
+		s = regReplace(s, "internal var", "private var");
+		s = regReplace(s, "protected function", "private function");
+		s = regReplace(s, "internal function", "private function");
 
 		/* -----------------------------------------------------------*/
 		// namespaces
@@ -213,8 +213,8 @@ class AS3ToHaxe
 		
 		/* -----------------------------------------------------------*/
 		// change const to inline statics
-		s = quickRegR(s, "([\n\t ]+)(public|private)([ ]*)const([ ]+)([a-zA-Z0-9_]+)([ ]*):", "$1$2$3static inline var$4$5$6:");
-		s = quickRegR(s, "([\n\t ]+)(public|private)([ ]*)(static)*([ ]+)const([ ]+)([a-zA-Z0-9_]+)([ ]*):", "$1$2$3$4$5inline var$6$7$8:");
+		s = regReplace(s, "([\n\t ]+)(public|private)([ ]*)const([ ]+)([a-zA-Z0-9_]+)([ ]*):", "$1$2$3static inline var$4$5$6:");
+		s = regReplace(s, "([\n\t ]+)(public|private)([ ]*)(static)*([ ]+)const([ ]+)([a-zA-Z0-9_]+)([ ]*):", "$1$2$3$4$5inline var$6$7$8:");
 		
 		/* -----------------------------------------------------------*/
 		// move variables being set from var def to top of constructor
@@ -227,7 +227,7 @@ class AS3ToHaxe
 		// if " Error (" then add "import flash.Error" to head
 		var r = new EReg("([ ]+)new([ ]+)Error([ ]*)\\(", "");
 		if (r.match(s))
-			s = quickRegR(s, "class([ ]*)(" + className + ")", "import flash.Error;\n\nclass$1$2");
+			s = regReplace(s, "class([ ]*)(" + className + ")", "import flash.Error;\n\nclass$1$2");
 		
 		/* -----------------------------------------------------------*/
 
@@ -244,7 +244,7 @@ class AS3ToHaxe
 				d.ppg = r.matched(2);
 				if (d.ppg == "") d.ppg = "public";
 				d.name = r.matched(6);
-				d.get = "get" + d.name.substr(0, 1).toUpperCase() + d.name.substr(1);
+				d.get = "get_" + d.name;
 				d.type = r.matched(11);
 			}
 			
@@ -256,7 +256,7 @@ class AS3ToHaxe
 					if (d.name == null) d.name = r.matched(6);
 				d.pps = r.matched(2);
 				if (d.pps == "") d.pps = "public";
-				d.set = "set" + d.name.substr(0, 1).toUpperCase() + d.name.substr(1);
+				d.set = "set_" + d.name;
 				if (d.type == null) d.type = r.matched(12);
 			}
 			
@@ -265,29 +265,48 @@ class AS3ToHaxe
 
 			// replace get
 			if (d.get != null)
-				s = quickRegR(s, d.ppg + "([ ]+)function([ ]+)get([ ]+)" + d.name, "private function " + d.get);
+				s = regReplace(s, d.ppg + "([ ]+)function([ ]+)get([ ]+)" + d.name, "private function " + d.get);
 			
 			// replace set
 			if (d.set != null)
-				s = quickRegR(s, d.pps + "([ ]+)function([ ]+)set([ ]+)" + d.name, "private function " + d.set);
+				s = regReplace(s, d.pps + "([ ]+)function([ ]+)set([ ]+)" + d.name, "private function " + d.set);
 			
 			// make haxe getter/setter OR finish
 			if (d.get != null || d.set != null) {
-				var gs = (d.ppg != null ? d.ppg : d.pps) + " var " + d.name + "(" + d.get + ", " + d.set + "):" + d.type + ";";
-				s = quickRegR(s, "private function " + (d.get != null ? d.get : d.set), gs + "\n \tprivate function " + (d.get != null ? d.get : d.set));
+				var gs = (d.ppg != null ? d.ppg : d.pps) + " var " + d.name + "(" + (d.get != null ? 'get' : 'null') + ", " + (d.set != null ? 'set' : 'null') + "):" + d.type + ";";
+				s = regReplace(s, "private function " + (d.get != null ? d.get : d.set), gs + "\n \tprivate function " + (d.get != null ? d.get : d.set));
 			}else {
 				break;
 			}
 		}
+		
+		// Replace undefined with null
+		s = regReplace(s, "undefined", "null", "g");
+		
+		// Replace strict operators, with lose ones
+		s = regReplace(s, "===", "==", "g");
+		s = regReplace(s, "!==", "!=", "g");
+		
+		// Replace Function types with Dynamic
+		s = regReplace(s, ":([ ]*)Function", ":$1Dynamic", "g");
 
 		/* -----------------------------------------------------------*/
 		
-		// for loops (?)
-		// TODO!
-		//s = quickRegR(s, "for([ ]*)\\(([ ]*)var([ ]*)([A-Z][a-zA-Z0-9_]*)([.^;]*);([.^;]*);([.^\\)]*)\\)", "");
-		//var t = quickRegM(s, "for([ ]*)\\(([ ]*)var([ ]*)([a-zA-Z][a-zA-Z0-9_]*)([.^;]*)", 5);
-		//trace(t);
-		//for (var i : Int = 0; i < len; ++i)
+		// for loops that count
+		// for (i=0; i < len; ++i) | for (var i : int = 0; i < len; ++i)
+		s = regReplace(s, "for( *)\\(( *)(var )?([a-zA-Z_][a-zA-Z0-9_]*)( *: *[a-zA-Z_][a-zA-Z0-9_]+)? *= *([^;]*);[ a-zA-Z0-9_]*(<=|<|>|>=) *([a-zA-Z0-9_]*)[^\\)]*\\)", "for$1($2$4 in $6...$8$2)", "g");
+		
+		// for loops that count without setting a variable int
+		//for (var i : int; i < len; ++i)
+		s = regReplace(s, "for( *)\\(( *)var ?([a-zA-Z_][a-zA-Z0-9_]*)(: *Int) *;[ a-zA-Z0-9_]*(<=|<|>|>=) *([a-zA-Z0-9_]*)[^\\)]*\\)", "for$1($2$3 in 0...$6$2)", "g");
+		
+		
+		
+		// for each loops
+		s = regReplace(s, "for each([ ]*)\\(([ ]*)(var )?([a-zA-Z_][a-zA-Z0-9_]*)( *: *[a-zA-Z_][a-zA-Z0-9_]*)?([ ]+)in([ ]+)([a-zA-Z_][a-zA-Z0-9_]*)([ ]*)\\)", "for$1($2$4 in $8$2)", "g"); 
+		
+		// for loops counting
+		
 		
 		/* -----------------------------------------------------------*/
 
@@ -310,12 +329,12 @@ class AS3ToHaxe
 		//trace(nameSpaces);
 	}
 	
-	public static function quickRegR(str:String, reg:String, rep:String, ?regOpt:String = "g"):String
+	public static function regReplace(str:String, reg:String, rep:String, ?regOpt:String = "g"):String
 	{
 		return new EReg(reg, regOpt).replace(str, rep);
 	}
 	
-	public static function quickRegM(str:String, reg:String, ?numMatches:Int = 1, ?regOpt:String = "g"):Array<String>
+	public static function regMatch(str:String, reg:String, ?numMatches:Int = 1, ?regOpt:String = "g"):Array<String>
 	{
 		var r = new EReg(reg, regOpt);
 		var m = r.match(str);

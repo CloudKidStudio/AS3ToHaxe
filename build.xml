@@ -29,9 +29,13 @@
 			<arg line="-main ${id}" />
 			<arg line="-${runtime} ${build.dir}/${id}.n" />
 		</exec>
+		<antcall target="buildTests" />
 	</target>
 	
 	<target name="buildTests">
-		<test id="Basic" />
+		<test id="Structure" />
+		<test id="Loops" />
+		<test id="GettersSetters" />
+		<test id="Types" />
 	</target>
 </project>

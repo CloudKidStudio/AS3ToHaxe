@@ -20,32 +20,8 @@ ant
 
 Todo
 ----
-###1.Getters/Setters
 
-AS3:
-```as3
-function get x():Number {
-	return _x;
-}
-function set x(value:Number):Number {
-	_x = value;
-} 
-```
-Should be replaced to this:
-```
-public var x(getX, setY):Float
-function getX ():Float
-{
-	return _x;
-}
-
-function setX (value:Float):Float
-{
-	return _x = value;
-}
-```
-
-###2.cast
+###cast
 
 AS3:
 ```as3
@@ -57,22 +33,7 @@ cast(sprite, Sprite)
 ```
 Where sprite is instance, Sprite is a class.
 
-###3.for each
-
-AS3 For each loops
-```as3
-for each(var i:Item in items)
-{
-}
-```	
-Should be ported to:
-```
-for (i in items)
-{
-}
-```
-
-###4.for
+###for
 
 AS3 Loops like this:
 ```as3
@@ -87,7 +48,7 @@ for (i in 0...10)
 }
 ```
 
-###5.is
+###is
 
 AS3 "is" like 
 ```as3
@@ -98,7 +59,7 @@ Should be changed to
 Std.is(1, Int)
 ```
 
-###6.Haxe doesn't support lower case imports like this:
+###Haxe doesn't support lower case imports like this:
 ```as3
 import flash.utils.getQualifiedClassName;
 import flash.utils.getTimer;
@@ -115,7 +76,7 @@ Should be changed to:
 var a:int = flash.utils.getTimer();
 ```
 
-###7.Convert Vector to Array
+###Convert Vector to Array
 
 Replace Vector with Array
 ```as3
@@ -126,7 +87,7 @@ To
 Array<Sprite>
 ```
 
-###8.Change Vector arrays initializations to Array
+###Change Vector arrays initializations to Array
 AS3 code like this:
 ```as3
 var a:Vector.<MyClass> = new <MyClass> [new MyClass()];
@@ -137,7 +98,7 @@ var a:Array<MyClass> = new Array<MyClass>();
 a.push(new MyClass());
 ```
 
-###9.Replace those dynamic params
+###Replace those dynamic params
 ```as3
 function test (...params):void {
 }
@@ -148,12 +109,12 @@ function test (params:Array<Dynamic>) {
 }
 ```   
  
-###10.Final vars should be replaced with this tag 
+###Final vars should be replaced with this tag 
 ```
 @:final
 ```  
    
-###11.Events meta tags like this
+###Events meta tags like this
  
 AS3:
 ```as3
