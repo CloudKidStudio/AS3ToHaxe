@@ -13,7 +13,8 @@ class Loops
 	for (i in 0...200)
 	{
 	}
-
+	
+	var len:Int = 400;
 	for ( i in 0...len )
 	{	
 	}

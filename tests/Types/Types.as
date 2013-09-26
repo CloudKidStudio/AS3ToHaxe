@@ -7,11 +7,18 @@ package com.example
 		private var __data:*:
 
 		public var __id:int;
+		
+		public var __position:uint;
 
 		public var __isPlaying:Boolean = false;
 
 		protected var __someNumber:Number = 100;
 
 		protected var __map:Vector.<String>;
+		
+		public function doSomething(): void
+		{
+			
+		}
 	}
 }

@@ -13,7 +13,8 @@ package com.example
 		for (var i:int; i < 200; i++)
 		{
 		}
-
+		
+		var len:int = 400;
 		for ( var i:int = 0; i < len; i++ )
 		{	
 		}
