@@ -130,6 +130,9 @@ class AS3ToHaxe
 		
 		// class
 		s = regReplace(s, "public class", "class");
+		
+		// Replace final
+		s = regReplace(s, "([ \\t\\n\\r]*)final (public|protected|private|function|static|class)", "$1@:final $2");
 
 		// constructor
 		s = regReplace(s, "function " + className, "function new");
@@ -139,7 +142,7 @@ class AS3ToHaxe
 		s = regReplace(s, "([^a-zA-Z0-9_.]+)int\\((\\-?[0-9]*\\.[0-9]*+)\\)", "$1Std.int($2)");
 		s = regReplace(s, "([^a-zA-Z0-9_.]+)int\\(([^\\)]+)\\)", "$1Std.parseInt($2)");
 		s = regReplace(s, "([^a-zA-Z0-9_.]+)String\\(([^\\)]+)\\)", "$1Std.string($2)");
-		s = regReplace(s, "([^a-zA-Z0-9_.]+)([A-Z][a-zA-Z0-9_]*)\\(([^\\)]+)\\)", "$1cast($3, $2)");
+		s = regReplace(s, "([^a-zA-Z0-9_.\\[])([A-Z][a-zA-Z0-9_]*)\\(([^\\)]+)\\)", "$1cast($3, $2)");
 		s = regReplace(s, "([^a-zA-Z0-9_.]+)([a-zA-Z_][a-zA-Z0-9_]*) +as +([A-Z][a-zA-Z0-9_]*)", "$1cast($2, $3)");
 		s = regReplace(s, "([^a-zA-Z0-9_.]+)([a-zA-Z_][a-zA-Z0-9_]*)([ ]+)is([ ]+)([a-zA-Z_][a-zA-Z0-9_]*)", "$1Std.is($2,$5)");
 		
@@ -298,6 +301,10 @@ class AS3ToHaxe
 		
 		// Replace Function types with Dynamic
 		s = regReplace(s, ":([ ]*)Function", ":$1Dynamic", "g");
+		
+		// Event meta tags
+		// @:meta(Event(name="test",type="Foo"))
+		s = regReplace(s, "\\[Event\\(([^\\)]*)\\)\\]", "@:meta(Event($1))");
 
 		/* -----------------------------------------------------------*/
 		
@@ -318,8 +325,6 @@ class AS3ToHaxe
 		// for each loops
 		s = regReplace(s, "for each([ ]*)\\(([ ]*)(var )?([a-zA-Z_][a-zA-Z0-9_]*)( *: *[a-zA-Z_][a-zA-Z0-9_]*)?([ ]+)in([ ]+)([a-zA-Z_][a-zA-Z0-9_]*)([ ]*)\\)", 
 			"for$1($2$4 in $8$2)", "g"); 
-		
-		// for loops counting
 		
 		
 		/* -----------------------------------------------------------*/

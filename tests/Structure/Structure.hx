@@ -2,7 +2,7 @@ package com.example;
 
 import flash.display.MovieClip;
 
-class Structure extends MovieClip
+@:final class Structure extends MovieClip
 {		
 	public function new()
 	{
@@ -15,5 +15,9 @@ class Structure extends MovieClip
 		if (name != null)
 		{
 		}
+	}
+	
+	@:final static public function something(): Void
+	{
 	}
 }

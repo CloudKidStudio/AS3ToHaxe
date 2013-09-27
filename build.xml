@@ -56,5 +56,6 @@
 		<test id="GettersSetters" />
 		<test id="Types" />
 		<test id="Casts" />
+		<test id="Events" />
 	</target>
 </project>

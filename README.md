@@ -74,18 +74,7 @@ function test (params:Array<Dynamic>) {
 ###Final vars should be replaced with this tag 
 ```
 @:final
-```  
-   
-###Events meta tags like this
- 
-AS3:
-```as3
-[Event(name="test",type="Foo")]
-```
-To:
-```
-@:meta(Event(name="test",type="Foo"))
-```
+``` 
 And should be checked other things and changed like in this article.
 http://www.nme.io/developer/guides/actionscript-developers/
 
