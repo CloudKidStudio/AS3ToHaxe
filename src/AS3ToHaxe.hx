@@ -301,18 +301,23 @@ class AS3ToHaxe
 
 		/* -----------------------------------------------------------*/
 		
+		// Do for in loops first
+		s = regReplace(s, "([ \t]*)for( *)\\(( *)(var )?([a-zA-Z_][a-zA-Z0-9_]*)( *: *[a-zA-Z_][a-zA-Z0-9_]+)?( *in *)([^\\) ]*)( *\\))", 
+			"$1var fields = Reflect.fields($8);\n$1for$2($3$5$7fields$9", "g");
+		
 		// for loops that count
 		// for (i=0; i < len; ++i) | for (var i : int = 0; i < len; ++i)
-		s = regReplace(s, "for( *)\\(( *)(var )?([a-zA-Z_][a-zA-Z0-9_]*)( *: *[a-zA-Z_][a-zA-Z0-9_]+)? *= *([^;]*);[ a-zA-Z0-9_]*(<=|<|>|>=) *([a-zA-Z0-9_]*)[^\\)]*\\)", "for$1($2$4 in $6...$8$2)", "g");
+		s = regReplace(s, "for( *)\\(( *)(var )?([a-zA-Z_][a-zA-Z0-9_]*)( *: *[a-zA-Z_][a-zA-Z0-9_]+)? *= *([^;]*);[ a-zA-Z0-9_]*(<=|<|>|>=) *([a-zA-Z0-9_]*)[^\\)]*\\)", 
+			"for$1($2$4 in $6...$8$2)", "g");
 		
 		// for loops that count without setting a variable int
 		//for (var i : int; i < len; ++i)
-		s = regReplace(s, "for( *)\\(( *)var ?([a-zA-Z_][a-zA-Z0-9_]*)(: *Int) *;[ a-zA-Z0-9_]*(<=|<|>|>=) *([a-zA-Z0-9_]*)[^\\)]*\\)", "for$1($2$3 in 0...$6$2)", "g");
-		
-		
+		s = regReplace(s, "for( *)\\(( *)var ?([a-zA-Z_][a-zA-Z0-9_]*)(: *Int) *;[ a-zA-Z0-9_]*(<=|<|>|>=) *([a-zA-Z0-9_]*)[^\\)]*\\)", 
+			"for$1($2$3 in 0...$6$2)", "g");
 		
 		// for each loops
-		s = regReplace(s, "for each([ ]*)\\(([ ]*)(var )?([a-zA-Z_][a-zA-Z0-9_]*)( *: *[a-zA-Z_][a-zA-Z0-9_]*)?([ ]+)in([ ]+)([a-zA-Z_][a-zA-Z0-9_]*)([ ]*)\\)", "for$1($2$4 in $8$2)", "g"); 
+		s = regReplace(s, "for each([ ]*)\\(([ ]*)(var )?([a-zA-Z_][a-zA-Z0-9_]*)( *: *[a-zA-Z_][a-zA-Z0-9_]*)?([ ]+)in([ ]+)([a-zA-Z_][a-zA-Z0-9_]*)([ ]*)\\)", 
+			"for$1($2$4 in $8$2)", "g"); 
 		
 		// for loops counting
 		
