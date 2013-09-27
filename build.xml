@@ -15,8 +15,26 @@
 				<arg line="-from ${tests.dir}/@{id}" />
 				<arg line="-to ${tests.dir}/@{id}" />
 			</exec>
+			<loadfile property="@{id}" srcFile="${tests.dir}/@{id}/@{id}.hx" />
+			<loadfile property="@{id}.result" srcFile="${tests.dir}/@{id}/@{id}.result.hx" />
+			<compare id="@{id}" output="${@{id}}" result="${@{id}.result}" />
 		</sequential>
 	</macrodef>
+	
+	<scriptdef name="compare" language="javascript">
+		<attribute name="output" />
+		<attribute name="result" />
+		<attribute name="id" />
+		<![CDATA[
+			var output = String(attributes.get("output"));
+			var result = String(attributes.get("result"));
+			var id = attributes.get("id");
+			if (!output || !result || output != result)
+				self.log("[FAILED] " + id);
+			else
+				self.log("[PASSED] " + id);
+	     ]]>
+	</scriptdef>
 	
 	<target name="build">
 		<fail unless="compiler" message="compiler needs to be specified in the build properties as the haxe compiler" />
@@ -29,10 +47,10 @@
 			<arg line="-main ${id}" />
 			<arg line="-${runtime} ${build.dir}/${id}.n" />
 		</exec>
-		<antcall target="buildTests" />
+		<antcall target="runTests" />
 	</target>
 	
-	<target name="buildTests">
+	<target name="runTests">
 		<test id="Structure" />
 		<test id="Loops" />
 		<test id="GettersSetters" />
