@@ -8,20 +8,20 @@ class GettersSetters
 		return __data;
 	}
 
-	private function set_data(data:Dynamic): Void
+	public var position(get, never):String;
+ 	private function get_position(): String
 	{
-		__data = data;
+		return __position;
 	}
 
-	public var name(get, set):String;
- 	private function get_name(): String
-	{
-		return __name;
-	}
-
-	public var id(null, set):Int;
- 	private function set_id(id:Int): Void
+	public var id(never, set):Int;
+ 	private function set_id(id:Int):Int
 	{
 		__id = id;
+	}
+	
+	private function set_data(data:Dynamic):Dynamic
+	{
+		__data = data;
 	}
 }

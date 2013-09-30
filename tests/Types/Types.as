@@ -16,6 +16,8 @@ package com.example
 
 		protected var __map:Vector.<String>;
 		
+		protected var __onComplete:Function;
+		
 		public function doSomething(): void
 		{
 			

@@ -7,19 +7,19 @@ package com.example
 			return __data;
 		}
 
-		public function set data(data:*): void
+		public function get position(): String
 		{
-			__data = data;
-		}
-
-		public function get name(): String
-		{
-			return __name;
+			return __position;
 		}
 
 		public function set id(id:int): void
 		{
 			__id = id;
+		}
+		
+		public function set data(data:*): void
+		{
+			__data = data;
 		}
 	}
 }	

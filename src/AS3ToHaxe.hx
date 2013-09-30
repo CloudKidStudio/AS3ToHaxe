@@ -1,7 +1,8 @@
 /*
  * Copyright (c) 2011, TouchMyPixel & contributors
  * Original author : Tarwin Stroh-Spijer <tarwin@touchmypixel.com>
- * Contributers: Tony Polinelli <tonyp@touchmypixel.com>
+ * Contributers: Tony Polinelli <tonyp@touchmypixel.com>,
+ * 				Matt Karl <matt@cloudkid.com>
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,36 +36,51 @@ using StringTools;
 using AS3ToHaxe;
 
 /**
- * Simple Program which iterates -from folder, finds .mtt templates and compiles them to the -to folder
+ * Simple Program which iterates -from folder as3 documents, parses them to the -to folder as haxes files
  */
 class AS3ToHaxe
 {
+	/** The valid command line parameters */
 	public static var keys = ["-from", "-to", "-remove"];
 	
-	var to:String;
-	var from:String;
-	var remove:String;
-	var sysargs:Array<String>;
+	/** The path to export to */
+	private var to:String;
 	
-	var items:Array<String>;
+	/** The source directory to look for AS3 files */
+	private var from:String;
 	
-	public static var basePackage:String = "away3d";
+	/** If we should remove */
+	private var remove:String;
 	
-	private var nameSpaces:Map<String, ClassDefs>;
-	private var maxLoop:Int;
+	/** The system arguments */
+	private var sysargs:Array<String>;
 	
+	/** The collection of  */
+	private var files:Array<String>;
+	
+	/** Used for namespace */
+	//public static var basePackage:String = "away3d";
+	//private var nameSpaces:Map<String, ClassDefs>;
+	//private var maxLoop:Int;
+	
+	/**
+	*  Application entry point 
+	*/
 	static function main() 
 	{
 		new AS3ToHaxe();
 	}
 	
+	/**
+	*   Constructor for application 
+	*/
 	public function new()
 	{
-		maxLoop = 1000;
+		//maxLoop = 1000;
 		
+		// Parse the commandline arguments
 		if (parseArgs())
 		{
-		
 			// make sure that the to directory exists
 			if (!FileSystem.exists(to)) FileSystem.createDirectory(to);
 			
@@ -72,29 +88,32 @@ class AS3ToHaxe
 			if (remove == "true")
 				removeDirectory(to);
 			
-			items = [];
-			// fill items
-			recurse(from);
+			// Get all of the as files
+			files = recurse(from);
 
 			// to remember namespaces
-			nameSpaces = new Map<String, ClassDefs>();
+			//nameSpaces = new Map<String, ClassDefs>();
 			
-			for (item in items)
+			for (file in files)
 			{
 				// make sure we only work wtih AS fiels
-				var ext = getExt(item);
+				var ext = getExt(file);
 				switch(ext)
 				{
 					case "as": 
-						convert(item);
+						convert(file);
 				}
 			}
 			
 			// build namespace files
-			buildNameSpaces();
+			//buildNameSpaces();
 		}
 	}
 	
+	/**
+	*   Convert a single file from AS3 to Haxe
+	*   @param The file path to convert
+	*/
 	private function convert(file:String):Void
 	{		
 		var fromFile = file;
@@ -166,7 +185,7 @@ class AS3ToHaxe
 		s = regReplace(s, "new Vector([ ]*)([ ]*)<([ ]*)([^>]*)([ ]*)>([ ]*)\\(([ ]*)\\)([ ]*)", "new Vector()");
 		// and import if we have to
 		if (hasVectors) {
-			s = regReplace(s, "class([ ]*)(" + className + ")", "import flash.Vector;\n\nclass$1$2");
+			s = addImport(s, className, "flash.Vector");
 		}
 		
 		// array
@@ -181,7 +200,7 @@ class AS3ToHaxe
 		/* -----------------------------------------------------------*/
 		// namespaces
 		// find which namespaces are used in this class
-		var r = new EReg("([^#])use([ ]+)namespace([ ]+)([a-zA-Z-]+)([ ]*);", "g");
+		/*var r = new EReg("([^#])use([ ]+)namespace([ ]+)([a-zA-Z-]+)([ ]*);", "g");
 		b = 0;
 		while (true) {
 			b++; if (b > maxLoop) { logLoopError("namespaces find", file); break; }
@@ -221,7 +240,7 @@ class AS3ToHaxe
 				s = r.replace(s, "private$1function$2$3set");
 				if (!matched) break;
 			}
-		}
+		}*/
 		
 		/* -----------------------------------------------------------*/
 		// change const to inline statics
@@ -229,67 +248,84 @@ class AS3ToHaxe
 		s = regReplace(s, "([\n\t ]+)(public|private)([ ]*)(static)*([ ]+)const([ ]+)([a-zA-Z0-9_]+)([ ]*):", "$1$2$3$4$5inline var$6$7$8:");
 		
 		/* -----------------------------------------------------------*/
-		// move variables being set from var def to top of constructor
-		// do NOT do this for const
-		// if they're static, leave them there
-		// TODO!
-		
-		/* -----------------------------------------------------------*/
 		// Error > flash.Error
 		// if " Error (" then add "import flash.Error" to head
 		var r = new EReg("([ ]+)new([ ]+)Error([ ]*)\\(", "");
 		if (r.match(s))
-			s = regReplace(s, "class([ ]*)(" + className + ")", "import flash.Error;\n\nclass$1$2");
+			s = addImport(s, className, "flash.Error");
 		
 		/* -----------------------------------------------------------*/
 
-		// create getters and setters
-		b = 0;
-		while (true) {
-			b++;
-			var d = { get: null, set: null, type: null, ppg: null, pps: null, name: null };
-			
-			// get
-			var r = new EReg("([\n\t ]+)([a-z]+)([ ]*)function([ ]*)get([ ]+)([a-zA-Z_][a-zA-Z0-9_]+)([ ]*)\\(([ ]*)\\)([ ]*):([ ]*)([A-Z][a-zA-Z0-9_]*)", "");
-			var m = r.match(s);
-			if (m) {
-				d.ppg = r.matched(2);
-				if (d.ppg == "") d.ppg = "public";
-				d.name = r.matched(6);
-				d.get = "get_" + d.name;
-				d.type = r.matched(11);
+		// create getters and setters		
+		var matches = [];
+		
+		// Match all the 
+		var r = new EReg("([\n\t ]+)([a-z]+)([ ]*)function([ ]+)get([ ]+)([a-zA-Z_][a-zA-Z0-9_]+)([ ]*)\\(([ ]*)\\)([ ]*):([ ]*)([A-Z][a-zA-Z0-9_]*)", "g");
+		
+		var originalStr = s;
+		
+		// Match all the getters
+		while (r.match(s))
+		{ 
+			s = r.matchedRight();
+			matches.push({ 
+				get: true, 
+				set: false, 
+				type: r.matched(11), 
+				getAccess: (r.matched(2) == "" ? "public" : r.matched(2)), 
+				setAccess: null, 
+				name: r.matched(6) 
+			});
+		}
+		
+		s = originalStr;
+		
+		var r = new EReg("([\n\t ]+)([a-z]+)([ ]*)function([ ]+)set([ ]+)([a-zA-Z_][a-zA-Z0-9_]*)([ ]*)\\(([ ]*)([a-zA-Z][a-zA-Z0-9_]*)([ ]*):([ ]*)([a-zA-Z][a-zA-Z0-9_]*)", "");
+		
+		// Match all the setters
+		while (r.match(s))
+		{ 
+			var d = { 
+				get: false, 
+				set: true, 
+				type: r.matched(12), 
+				getAccess: null, 
+				setAccess: null, 
+				name: r.matched(6) 
+			};
+			var hasGetter = false;
+			for(m in matches)
+			{
+				if (m.name == d.name)
+				{
+					d = m;
+					d.set = true;
+					hasGetter = true;
+					break;
+				}
 			}
 			
-			// set
-			var r = new EReg("([\n\t ]+)([a-z]+)([ ]*)function([ ]*)set([ ]+)([a-zA-Z_][a-zA-Z0-9_]*)([ ]*)\\(([ ]*)([a-zA-Z][a-zA-Z0-9_]*)([ ]*):([ ]*)([a-zA-Z][a-zA-Z0-9_]*)", "");
-			var m = r.match(s);
-			if (m) {
-				if (r.matched(6) == d.get || d.get == null)
-					if (d.name == null) d.name = r.matched(6);
-				d.pps = r.matched(2);
-				if (d.pps == "") d.pps = "public";
-				d.set = "set_" + d.name;
-				if (d.type == null) d.type = r.matched(12);
-			}
+			d.setAccess = r.matched(2) == "" ? "public" : r.matched(2);
+			s = r.matchedRight();
 			
-			// ERROR
-			if (b > maxLoop) { logLoopError("getter/setter: " + d, file); break; }
-
+			if (!hasGetter) matches.push(d);
+		}
+		
+		s = originalStr;
+		
+		for (m in matches)
+		{
 			// replace get
-			if (d.get != null)
-				s = regReplace(s, d.ppg + "([ ]+)function([ ]+)get([ ]+)" + d.name, "private function " + d.get);
+			if (m.get)
+				s = regReplace(s, m.getAccess + "([ ]+)function([ ]+)get([ ]+)" + m.name, "private function get_" + m.name);
 			
 			// replace set
-			if (d.set != null)
-				s = regReplace(s, d.pps + "([ ]+)function([ ]+)set([ ]+)" + d.name, "private function " + d.set);
+			if (m.set)
+				s = regReplace(s, m.setAccess + "([ ]+)function([ ]+)set([ ]+)" + m.name +"([ ]*)\\(([^\\)]+)\\)([ ]*)[ :a-zA-Z0-9]*", "private function set_" + m.name + "($5)$6:" + m.type);
 			
-			// make haxe getter/setter OR finish
-			if (d.get != null || d.set != null) {
-				var gs = (d.ppg != null ? d.ppg : d.pps) + " var " + d.name + "(" + (d.get != null ? 'get' : 'null') + ", " + (d.set != null ? 'set' : 'null') + "):" + d.type + ";";
-				s = regReplace(s, "private function " + (d.get != null ? d.get : d.set), gs + "\n \tprivate function " + (d.get != null ? d.get : d.set));
-			}else {
-				break;
-			}
+			var prop = (m.getAccess != null ? m.getAccess : m.setAccess) + " var " + m.name + "(" + (m.get ? 'get' : 'never') + ", " + (m.set ? 'set' : 'never') + "):" + m.type + ";";
+			var func = (m.get ? "get" : "set") + "_" + m.name;
+			s = regReplace(s, "private function " + func, prop + "\n \tprivate function " + func);
 		}
 		
 		// Replace undefined with null
@@ -300,12 +336,17 @@ class AS3ToHaxe
 		s = regReplace(s, "!==", "!=", "g");
 		
 		// Replace Function types with Dynamic
-		s = regReplace(s, ":([ ]*)Function", ":$1Dynamic", "g");
+		var r = new EReg(":([ ]*)Function", "");
+		if (r.match(s))
+			s = addImport(s, className, "flash.utils.Function");
 		
 		// Event meta tags
 		// @:meta(Event(name="test",type="Foo"))
 		s = regReplace(s, "\\[Event\\(([^\\)]*)\\)\\]", "@:meta(Event($1))");
-
+		
+		// dynamic properties
+		s = regReplace(s, "\\.\\.\\.([a-zA-Z0-9]+)([ ]*)\\)", "$1:Array<Dynamic>$2)");
+		
 		/* -----------------------------------------------------------*/
 		
 		// Do for in loops first
@@ -326,8 +367,11 @@ class AS3ToHaxe
 		s = regReplace(s, "for each([ ]*)\\(([ ]*)(var )?([a-zA-Z_][a-zA-Z0-9_]*)( *: *[a-zA-Z_][a-zA-Z0-9_]*)?([ ]+)in([ ]+)([a-zA-Z_][a-zA-Z0-9_]*)([ ]*)\\)", 
 			"for$1($2$4 in $8$2)", "g"); 
 		
-		
 		/* -----------------------------------------------------------*/
+		
+		// Subsitutionts for qualified class name and definition
+		s = regReplace(s, "getQualifiedClassName([ ]*)\\(", "Type.getClassName$1(", "g");
+		s = regReplace(s, "getDefinitionByName([ ]*)\\(", "Type.getClass$1(", "g");
 
 		var o = sys.io.File.write(toFile, true);
 		o.writeString(s);
@@ -337,22 +381,39 @@ class AS3ToHaxe
 		//Sys.exit(1);
 	}
 	
+	/**
+	*   Add an import to the stack of imports before the class definition 
+	*   @param The full class string
+	*   @param The class name to import (e.g. "flash.Error")
+	*/
+	public function addImport(s:String, className:String, classImport:String): String
+	{
+		return regReplace(s, "class([ ]*)(" + className + ")", "import "+classImport+";\n\nclass$1$2");
+	}
+	
 	private function logLoopError(type:String, file:String)
 	{
 		trace("ERROR: " + type + " - " + file);
 	}
 	
-	private function buildNameSpaces()
+	/**private function buildNameSpaces()
 	{
 		// build friend namespaces!
 		//trace(nameSpaces);
-	}
+	}*/
 	
 	public static function regReplace(str:String, reg:String, rep:String, ?regOpt:String = "g"):String
 	{
 		return new EReg(reg, regOpt).replace(str, rep);
 	}
 	
+	/**
+	*  Match all
+	*  @param The string to match in 
+	*  @param The regular expression to match
+	*  @param The number of matches to fetch
+	*  @param The regular expression options
+	*/
 	public static function regMatch(str:String, reg:String, ?numMatches:Int = 1, ?regOpt:String = "g"):Array<String>
 	{
 		var r = new EReg(reg, regOpt);
@@ -369,6 +430,10 @@ class AS3ToHaxe
 		return [];
 	}
 	
+	/**
+	*   Create a new folder
+	*   @param The folder path to create 
+	*/
 	private function createFolder(path:String):Void
 	{
 		var parts = path.split("/");
@@ -381,6 +446,10 @@ class AS3ToHaxe
 		}
 	}
 	
+	/**
+	*  Parse tye command line arguments
+	*  @return Boolean if we have the arguments we need
+	*/
 	private function parseArgs():Bool
 	{
 		// Parse args
@@ -396,10 +465,15 @@ class AS3ToHaxe
 		return true;
 	}
 	
-	public function recurse(path:String)
+	/**
+	*  Recursively go through directory and find all actionscript files
+	*  @param The folder path
+	*  @return A collection of file stirngs
+	*/
+	public function recurse(path:String):Array<String>
 	{
 		var dir = FileSystem.readDirectory(path);
-		
+		var result = new Array<String>();
 		for (item in dir)
 		{
 			var s = path + "/" + item;
@@ -409,19 +483,28 @@ class AS3ToHaxe
 			}
 			else
 			{
-				var exts = ["as"];
-				if(Lambda.has(exts, getExt(item)))
-					items.push(s);
+				if(Lambda.has(["as"], getExt(item)))
+					result.push(s);
 			}
 		}
+		return result;
 	}
 	
-	public function getExt(s:String)
+	/**
+	*  Get a file's extension based on the path
+	*  @param s The file path 
+	*/
+	public function getExt(s:String):String
 	{
 		return s.substr(s.lastIndexOf(".") + 1).toLowerCase();
 	}
 	
-	public function removeDirectory(d, p = null)
+	/**
+	*   Remove a directory
+	*   @param d Directory path 
+	*   @param p Parent item
+	*/
+	public function removeDirectory(d, p = null):Void
 	{
 		if (p == null) p = d;
 		var dir = FileSystem.readDirectory(d);
@@ -439,7 +522,12 @@ class AS3ToHaxe
 		FileSystem.deleteDirectory(d);
 	}
 	
-	public static function fUpper(s:String)
+	/**
+	*  Upper-case a string
+	*  @param s The string to uppercase 
+	*  @return The uppercase string
+	*/
+	public static function fUpper(s:String):String
 	{
 		return s.charAt(0).toUpperCase() + s.substr(1);
 	}
@@ -449,9 +537,5 @@ class ClassDefs
 {
 	public var name:String;
 	public var defs:Map<String, String>;
-	
-	public function new()
-	{
-		
-	}
+	public function new(){}
 }
