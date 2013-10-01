@@ -51,7 +51,7 @@ Substitutions
 | `public function get data`, `public function set data` | `public var data(get, set)` |
 | `for (var i:int; i < 10; i++)` | `for (i in 0...10)`          |
 | `for each (var i:String in items)` | `for (i in items)`       |
-| `for (var k:String in items)`  | `var fields = Reflect.fields(items); for(k in fields)`
+| `for (var k:String in items)`  | `var fields = Reflect.fields(items);` `for(k in fields)`
 
 
 Rebuilding AS3ToHaxe
