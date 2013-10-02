@@ -132,15 +132,16 @@ class AS3ToHaxe
 		
 		// spacse to tabs
 		s = regReplace(s, "    ", "\t");
+		
 		// undent
 		s = regReplace(s, "^\t", "");
 		
 		// some quick setup, finding what we''ve got
 		var className = regMatch(s, "public class([ ]*)([A-Z][a-zA-Z0-9_]*)", 2)[1];
-		var hasVectors = (regMatch(s, "Vector([ ]*)\\.([ ]*)<([ ]*)([^>]*)([ ]*)>").length != 0);
 
 		// package
 		s = regReplace(s, "package ([a-zA-Z\\.0-9-_]*)([ \n\r]*){", "package $1;\n", "gs");
+		
 		// remove last 
 		s = regReplace(s, "\\}([\n\r\t ]*)\\}([\n\r\t ]*)$", "}", "gs");
 
@@ -178,15 +179,8 @@ class AS3ToHaxe
 		s = regReplace(s, "<uint>", "<UInt>");
 		s = regReplace(s, "<Boolean>", "<Bool>");
 		
-		// vector
-		// definition
-		s = regReplace(s, "Vector([ ]*)\\.([ ]*)<([ ]*)([^>]*)([ ]*)>", "Vector<$3$4$5>");
-		// new (including removing stupid spaces)
-		s = regReplace(s, "new Vector([ ]*)([ ]*)<([ ]*)([^>]*)([ ]*)>([ ]*)\\(([ ]*)\\)([ ]*)", "new Vector()");
-		// and import if we have to
-		if (hasVectors) {
-			s = addImport(s, className, "flash.Vector");
-		}
+		// vector definition replace with haxe typed arrays
+		s = regReplace(s, "Vector([ ]*)\\.([ ]*)<([ ]*)([^>]*)([ ]*)>", "Array<$3$4$5>");
 		
 		// array
 		s = regReplace(s, " Array([ ]*);", " Array<Dynamic>;");
@@ -253,6 +247,16 @@ class AS3ToHaxe
 		var r = new EReg("([ ]+)new([ ]+)Error([ ]*)\\(", "");
 		if (r.match(s))
 			s = addImport(s, className, "flash.Error");
+		
+		
+		/* -----------------------------------------------------------*/
+		
+		// replace the delete keyword
+		s = regReplace(s, "([\n\t ]+)delete([ ]+)([^\\[]*+)\\[([^\\]]+)\\]", "$1Reflect.deleteField($3, $4)");
+		s = regReplace(s, "([\n\t ]+)delete([ ]+)([^\\.]*+)\\.([^;]+)", "$1Reflect.deleteField($3, $4)");
+		
+		// Replace getTimer
+		s = regReplace(s, "getTimer\\(\\)", "flash.Lib.getTimer()");
 		
 		/* -----------------------------------------------------------*/
 

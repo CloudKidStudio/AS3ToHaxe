@@ -52,6 +52,7 @@
 	
 	<target name="runTests">
 		<test id="Structure" />
+		<test id="Methods" />
 		<test id="Loops" />
 		<test id="GettersSetters" />
 		<test id="Types" />

@@ -35,8 +35,11 @@ Substitutions
 | `[Event(type="", name="")]`    | `@:meta(Event(type="",name=""))` |
 | `getQualifiedClassName(type)`  | `Type.getClassName(type)`    |
 | `getDefinitionByName(name)`    | `Type.getClass(name)`        |
+| `delete object[prop]`          | `Reflect.deleteField(object, prop)` |
+| `delete object.prop`           | `Reflect.deleteField(object, prop)` |
+| `getTimer()`                   | `flash.Lib.getTimer()`       |
 | `:*`                           | `:Dynamic`                   |
-| `Vector.<String>`              | `Vector<String>`             |
+| `Vector.<String>`              | `Array<String>`              |
 | `Number("10.1")`               | `Std.parseFloat("10.1")`     |
 | `int(10.1)`                    | `Std.int(10.1)`              |
 | `int("10.1")`                  | `Std.parseInt("10.1)`        |
@@ -62,52 +65,7 @@ cd AS3ToHaxe
 ant
 ```
 
-Todo
-----
-
-###Haxe doesn't support lower case imports like this:
-```as3
-import flash.utils.getQualifiedClassName;
-import flash.utils.getTimer;
-import flash.utils.setTimeout;
-```  
-So convertor should remove imports and put in code those strings, like in this example:
-
-AS3:
-```as3
-var a:int = getTimer();
-``` 
-Should be changed to:
-```
-var a:int = flash.utils.getTimer();
-```
-
-###Convert Vector to Array
-
-Replace Vector with Array
-```as3
-Vector.<Sprite>
-```   
-To
-```
-Array<Sprite>
-```
-
-###Change Vector arrays initializations to Array
-AS3 code like this:
-```as3
-var a:Vector.<MyClass> = new <MyClass> [new MyClass()];
-```	
-To
-```
-var a:Array<MyClass> = new Array<MyClass>();
-a.push(new MyClass());
-```
-
-And should be checked other things and changed like in this article.
-http://www.nme.io/developer/guides/actionscript-developers/
-
 Credits
 -------
-Original code can be found here: 
-http://pastebin.com/s0VccheL
+
+Original code can be found here on [pastebin](http://pastebin.com/s0VccheL)

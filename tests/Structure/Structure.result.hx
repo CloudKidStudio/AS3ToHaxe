@@ -15,12 +15,5 @@ import flash.display.MovieClip;
 		if (name != null)
 		{
 		}
-		
-		Type.getClassName(Structure);
-		Type.getClass(name);
-	}
-	
-	@:final static public function something(params:Array<Dynamic>): Void
-	{
 	}
 }

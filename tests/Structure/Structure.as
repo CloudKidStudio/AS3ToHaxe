@@ -15,13 +15,6 @@ package com.example
 			if (name !== null)
 			{
 			}
-			
-			getQualifiedClassName(Structure);
-			getDefinitionByName(name);
-		}
-		
-		final static public function something(...params): void
-		{
 		}
 	}
 }
