@@ -21,6 +21,16 @@ package com.example
 			if (this is MovieClip)
 			{
 			}
+
+			var cTest:ConstructorTest = new ConstructorTest(0);
+		}
+	}
+
+	public class ConstructorTest
+	{
+		public function ConstructorTest(num:int)
+		{
+
 		}
 	}
 }
