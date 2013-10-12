@@ -21,7 +21,7 @@ class Casts extends MovieClip
 		if (Std.is(this,MovieClip))
 		{
 		}
-		
+
 		var cTest:ConstructorTest = new ConstructorTest(0);
 	}
 }
