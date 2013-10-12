@@ -483,7 +483,8 @@ class AS3ToHaxe
 			var s = path + "/" + item;
 			if (FileSystem.isDirectory(s))
 			{
-				recurse(s);
+				for (file in recurse(s))
+					result.push(file);
 			}
 			else
 			{
